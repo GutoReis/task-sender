@@ -3,6 +3,7 @@ import os
 
 from dotenv import load_dotenv
 import requests
+from slack_sdk.webhook import WebhookClient
 
 load_dotenv()
 TODOIST_TOKEN = os.environ["TODOIST_API_KEY"]
@@ -136,3 +137,10 @@ def build_msg_block():
     blocks.append(today_header)
     blocks.append(today_block)
     return blocks
+
+
+def send_msg_slack():
+    block_structure = build_msg_block()
+    slack_url = os.environ["SLACK_WEBHOOK"]
+    webhook = WebhookClient(slack_url)
+    response = webhook.send(text="Today tasks", blocks=block_structure)
