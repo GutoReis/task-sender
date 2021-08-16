@@ -42,19 +42,20 @@ def get_yesterday_tasks():
     content = response.json()
     full_text = ""
     for item in content:
-        labels = get_labels_name(item["label_ids"])
-        task_text = ">"
-        if "RECURRING" in labels:
-            labels.remove("RECURRING")
-            task_text += "TD - "
-        elif "MEETING" in labels:
-            task_text += "R - "
-        else:
-            task_text += "T - "
-        task_text += f"[{labels[0]}]"
-        task_text += item["content"]
-        task_text += "\n"
-        full_text += task_text
+        if "parent" not in item:
+            labels = get_labels_name(item["label_ids"])
+            task_text = ">"
+            if "RECURRING" in labels:
+                labels.remove("RECURRING")
+                task_text += "TD - "
+            elif "MEETING" in labels:
+                task_text += "R - "
+            else:
+                task_text += "T - "
+            task_text += f"[{labels[0]}]"
+            task_text += item["content"]
+            task_text += "\n"
+            full_text += task_text
     if full_text:
         return full_text
     else:
