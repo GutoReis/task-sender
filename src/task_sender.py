@@ -92,6 +92,29 @@ def get_today_tasks():
         return "> -"
 
 
+def get_blocked_tasks():
+    SECTION_ID = os.environ["TODOIST_SECTION_BLOCKED"]
+    url = f"{TODOIST_URL}/tasks"
+    params = {"project_id": TODOIST_PROJECT,
+              "section_id": SECTION_ID}
+    header = {"Authorization": f"Bearer {TODOIST_TOKEN}"}
+    response = requests.get(url=url, params=params, headers=header)
+    content = response.json()
+    full_text = ""
+    for item in content:
+        if "parent" not in item:
+            labels = get_labels_name(item["label_ids"])
+            task_text = "> B -"
+            task_text += f"[{labels[0]}]"
+            task_text += item["content"]
+            task_text += "\n"
+            full_text += task_text
+    if full_text:
+        return full_text
+    else:
+        return "> -"
+
+
 def build_msg_block():
     blocks = list()
     today = datetime.now().strftime("%d/%m/%Y")
@@ -138,6 +161,17 @@ def build_msg_block():
                                  "text": today_tasks}]}
     blocks.append(today_header)
     blocks.append(today_block)
+    # NOTE: BLOCKED TASK SECTION
+    blocked_header = {"type": "header",
+                      "text": {"type": "plain_text",
+                               "text": ":no_entry: Bloqueado",
+                               "emoji": True}}
+    blocked_tasks = get_blocked_tasks()
+    blocked_block = {"type": "context",
+                   "elements": [{"type": "mrkdwn",
+                                 "text": blocked_tasks}]}
+    blocks.append(blocked_header)
+    blocks.append(blocked_block)
     return blocks
 
 
